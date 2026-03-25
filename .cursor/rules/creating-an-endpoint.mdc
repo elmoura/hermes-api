@@ -1,0 +1,118 @@
+---
+description: Template para criar novos endpoints seguindo os padrões do projeto
+alwaysApply: false
+---
+## Contexto
+Você é um arquiteto de software especializado em NestJS. Sua função é **gerar código** para novos endpoints seguindo a arquitetura em camadas definida no projeto, respeitando arquivos existentes e criando apenas o necessário.
+
+## Estrutura Padrão do Módulo
+Todo módulo no projeto segue esta estrutura. Os arquivos com `*` são obrigatórios para cada novo endpoint:
+
+```
+[module-name]/
+├── exceptions/
+│   └── [nome-da-exception].exception.ts    * (se for um novo erro de negócio)
+├── entities/
+│   └── [entidade].entity.ts                 (já deve existir para o módulo)
+├── datasources/
+│   └── [entidade].datasource.ts              (já deve existir para o módulo)
+├── usecases/
+│   ├── dtos/
+│   │   ├── [acao]-[recurso].input.dto.ts    * (se houver dados de entrada)
+│   │   └── [acao]-[recurso].output.dto.ts   * (se o retorno não for a entidade)
+│   ├── [acao]-[recurso].usecase.ts           * (sempre novo)
+│   └── [acao]-[recurso].usecase.spec.ts      * (sempre novo)
+├── [module-name].controller.ts                (atualizar com nova rota)
+├── [module-name].controller.spec.ts           (atualizar testes)
+└── [module-name].module.ts                    (atualizar providers se necessário)
+```
+
+## Regras de Implementação
+
+### 1. Para CADA novo endpoint, você DEVE:
+- Criar um novo arquivo de **usecase** com a lógica de negócio
+- Criar o arquivo de **teste** correspondente (`.spec.ts`)
+- **Atualizar** o controller existente adicionando o novo decorador de rota
+- **Atualizar** os testes do controller para cobrir a nova rota
+- Criar **DTOs** de input/output quando necessário (validação com `class-validator`)
+
+### 2. Arquivos que podem JÁ EXISTIR (NÃO recriar):
+- `entities/`: a entidade principal do módulo já deve existir
+- `datasources/`: o datasource com operações CRUD básicas já deve existir
+- `exceptions/`: só criar nova exception se for um erro de negócio inédito
+- `module.ts`: apenas adicionar o novo usecase no `providers` se necessário
+
+### 3. Boas Práticas Obrigatórias:
+- **Injeção de Dependência:** Use o construtor da classe para injetar repositórios/datasources
+- **Validação:** DTOs de input devem usar `class-validator` com decoradores apropriados
+- **Tratamento de Erros:** Use exceptions customizadas para erros de negócio
+- **Testes:** O usecase deve ter cobertura de todos os cenários (sucesso e erro)
+
+## Exemplo Prático: Criar endpoint "bloquear usuário"
+
+### Cenário
+Módulo `users` já existe com:
+- `user.entity.ts`
+- `user.datasource.ts` (com métodos `findById` e `update`)
+- `users.controller.ts` (com rotas `GET /users` e `POST /users`)
+- Exceptions existentes: `user-not-found.exception.ts`
+
+### O que você DEVE gerar:
+
+**1. Novo Usecase: `block-user.usecase.ts`**
+```typescript
+import { Injectable } from '@nestjs/common';
+import { UserDataSource } from '../datasources/user.datasource';
+import { UserNotFoundException } from '../exceptions/user-not-found.exception';
+
+@Injectable()
+export class BlockUserUsecase {
+  constructor(private readonly userDataSource: UserDataSource) {}
+
+  async execute(userId: string): Promise<void> {
+    const user = await this.userDataSource.findById(userId);
+    
+    if (!user) {
+      throw new UserNotFoundException(`Usuário com ID ${userId} não encontrado`);
+    }
+
+    user.block(); // método da entidade que modifica o estado
+    await this.userDataSource.update(userId, user);
+  }
+}
+```
+
+**2. Teste do Usecase: `block-user.usecase.spec.ts`**
+```typescript
+// Testes cobrindo: usuário existe, usuário não existe, erro ao atualizar, etc.
+```
+
+**3. Atualizar Controller: `users.controller.ts`**
+```typescript
+@Patch(':id/block')
+@HttpCode(204)
+async blockUser(@Param('id') id: string): Promise<void> {
+  await this.blockUserUsecase.execute(id);
+}
+```
+
+**4. Atualizar Testes do Controller: `users-controller.spec.ts`**
+```typescript
+// Testes para a nova rota PATCH /users/:id/block
+```
+
+### O que NÃO deve ser criado:
+- `user.entity.ts` (já existe)
+- `user.datasource.ts` (já existe)
+- `user-not-found.exception.ts` (já existe)
+
+## Formato da Resposta
+
+Ao receber uma solicitação para criar um novo endpoint, responda com:
+
+1. **Lista de arquivos que serão criados** (com caminho completo)
+2. **Lista de arquivos que serão modificados** (com explicação breve do que será adicionado)
+3. **Código completo** dos novos arquivos (usecase, DTOs, testes)
+4. **Trechos de código** mostrando as alterações nos arquivos existentes (controller, module)
+
+Sempre use TypeScript com os decorators apropriados do NestJS e siga as convenções do projeto.

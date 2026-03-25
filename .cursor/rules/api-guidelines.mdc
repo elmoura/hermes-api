@@ -1,0 +1,68 @@
+---
+description: Regras para desenvolvimento no projeto NestJS + MongoDB
+globs: src/**/*.ts
+alwaysApply: true
+---
+
+# Contexto do Projeto
+Este é um projeto backend que utiliza **NestJS** com **TypeScript** para construir uma API REST. O banco de dados é **MongoDB** (com Mongoose) e utilizamos o pacote NPM **@google/generative-ai** para integração com o Gemini (LLM). Utilize Yarn como gerenciador de pacotes.
+
+# Estrutura de Pastas Obrigatória
+Ao criar ou modular código, siga rigorosamente a estrutura abaixo:
+
+```
+src/
+├── config/
+│   └── config.ts          # Objeto com valores de ambiente (env)
+├── shared/                 # Código reutilizável
+│   ├── utils/
+│   └── services/
+└── modules/
+    └── [module-name]/
+        ├── exceptions/
+        │   └── invalid-data.exception.ts  # Erro customizado para validação/regra de negócio
+        ├── entities/
+        │   └── module-entity.ts           # Entidade Mongoose (decoradores @nestjs/mongoose)
+        ├── datasources/
+        │   └── module-entity.datasource.ts # Camada de acesso ao banco (Mongoose)
+        ├── usecases/
+        │   ├── dtos/
+        │   │   ├── create-user-input.dto.ts   # Validação com class-validator
+        │   │   └── create-user-output.dto.ts  # (Opcional, se retornar entidade)
+        │   ├── create-[feature-name].usecase.ts
+        │   └── create-[feature-name]-usecase.spec.ts
+        ├── [module-name].controller.ts
+        ├── [module-name]-controller.spec.ts
+        └── [module-name].module.ts
+```
+
+# Regras de Implementação
+
+## 1. Camadas e Responsabilidades
+- **Controller:** Recebe requisições HTTP, mapeia erros de negócio para status HTTP e chama os usecases.
+- **Usecase:** Contém toda a lógica de negócio. Deve ser puro e testável.
+- **Datasource:** Apenas operações de banco de dados (CRUD). Não conter lógica de negócio.
+- **Entity:** Definida com decoradores do Mongoose.
+- **DTOs:** Usar `class-validator` para validação de entrada.
+
+## 2. Tratamento de Erros
+- Erros de domínio devem ser classes que estendem `Error` e ficam na pasta `exceptions/`.
+- O controller deve capturar essas exceções e retornar o HTTP Status adequado (ex: `InvalidDataException` -> 400 Bad Request).
+
+## 3. Testes
+- **Usecase:** Testar todos os cenários (feliz e triste). Cobertura completa.
+- **Controller:** Testar rotas e o mapeamento de erros/exceções.
+
+## 4. Integração com Gemini
+- Chamadas ao modelo Gemini devem ser encapsuladas em serviços dentro da pasta `shared/services/` e injetadas nos usecases que necessitarem.
+
+# Comportamento Esperado do Assistente
+Ao gerar código para este projeto:
+1. Siga **exatamente** a estrutura de pastas definida acima.
+2. Sempre crie os arquivos de teste correspondentes (`.spec.ts`) junto com a implementação.
+3. Utilize injeção de dependência do NestJS para conectar as camadas.
+4. Valide todos os DTOs de entrada com `class-validator`.
+5. Ao criar um novo módulo, gere toda a estrutura de pastas padrão (exceptions, entities, datasources, usecases/dtos, etc.) automaticamente.
+
+- Utilize sempre ObjectId para os IDs salvos no MongoDb
+- Utilize sempre boas práticas de desenvolvimento. Evite acoplar lógica específica em documentos genéricos. Idealmente, o usecase deve sempre ter a lógica específica do cenário e os demais componentes são mais genéricos. Ex.: DataSource com método "update" reaproveitável, e o usecase define quais campos serão alterados. O mesmo se aplica para outros componentes reaproveitáveis. Priorize sempre que a lógica específica daquele cenário esteja no usecase.
