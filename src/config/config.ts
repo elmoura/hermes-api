@@ -16,4 +16,8 @@ export const config = {
       return Number.isFinite(n) && n > 0 ? n : 48 * 60 * 60 * 1000;
     })(),
   },
+  whatsapp: {
+    verificationToken: process.env.WHATSAPP_VERIFICATION_TOKEN ?? '',
+    businessToken: process.env.WHATSAPP_BUSINESS_TOKEN ?? '',
+  },
 };

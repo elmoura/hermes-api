@@ -20,6 +20,10 @@ export class OrganizationEntity {
     enum: OrganizationPlanTypes,
   })
   planType: OrganizationPlanTypes;
+
+  facebookBusinessId?: string;
+
+  whatsappBusinessToken: string;
 }
 
 export type OrganizationDocument = HydratedDocument<OrganizationEntity>;
