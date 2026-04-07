@@ -17,6 +17,16 @@ async function bootstrap() {
     .setTitle('Hermes API')
     .setDescription('API REST do Hermes (NestJS + MongoDB).')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'Admin API Key',
+        description:
+          'Chave de serviço para rotas admin (variável de ambiente `ADMIN_API_KEY`). Envie como `Authorization: Bearer <chave>`.',
+      },
+      'admin-api-key',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document);

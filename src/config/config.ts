@@ -1,5 +1,10 @@
 import 'dotenv/config';
 
+/** Chave lida em tempo de execução (facilita testes e evita cache no import). */
+export function getAdminApiKey(): string {
+  return process.env.ADMIN_API_KEY ?? '';
+}
+
 export const config = {
   mongoUri: process.env.MONGO_URI ?? '',
   mail: {

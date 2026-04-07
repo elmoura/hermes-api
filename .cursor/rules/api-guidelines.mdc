@@ -5,7 +5,7 @@ alwaysApply: true
 ---
 
 # Contexto do Projeto
-Este é um projeto backend que utiliza **NestJS** com **TypeScript** para construir uma API REST. O banco de dados é **MongoDB** (com Mongoose) e utilizamos o pacote NPM **@google/generative-ai** para integração com o Gemini (LLM). Utilize Yarn como gerenciador de pacotes.
+Este é um projeto backend que utiliza **NestJS** com **TypeScript** para construir uma API REST. O banco de dados é **MongoDB** (com Mongoose) e utilizamos o pacote NPM **@google/generative-ai** para integração com o Gemini (LLM). Utilize NPM como gerenciador de pacotes.
 
 A documentação HTTP da API é gerada com **OpenAPI 3** via **`@nestjs/swagger`**. A UI interativa (Swagger UI) fica em **`/docs`** (configurada em `src/main.ts`). Não duplique a configuração global do Swagger em módulos; apenas documente cada rota e DTO conforme as regras abaixo.
 

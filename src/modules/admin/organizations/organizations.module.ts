@@ -9,9 +9,12 @@ import {
   OrganizationEntity,
   OrganizationSchema,
 } from './entities/organization.entity';
+import { AdminApiKeyGuard } from '../guards/admin-api-key.guard';
 import { OrganizationsController } from './organizations.controller';
 import { CreateOrganizationUsecase } from './usecases/create-organization.usecase';
+import { GetOrganizationByIdUsecase } from './usecases/get-organization-by-id.usecase';
 import { InviteUserUsecase } from './usecases/invite-user.usecase';
+import { ListOrganizationsUsecase } from './usecases/list-organizations.usecase';
 
 @Module({
   imports: [
@@ -22,10 +25,13 @@ import { InviteUserUsecase } from './usecases/invite-user.usecase';
   ],
   controllers: [OrganizationsController],
   providers: [
+    AdminApiKeyGuard,
     OrganizationEntityDatasource,
     UserEntityDatasource,
     CreateOrganizationUsecase,
     InviteUserUsecase,
+    ListOrganizationsUsecase,
+    GetOrganizationByIdUsecase,
     Md5HashService,
     EmailService,
   ],

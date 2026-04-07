@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { InvalidDataException } from './exceptions/invalid-data.exception';
 import { OrganizationPlanTypes } from './entities/organization.entity';
@@ -6,6 +6,8 @@ import { OrganizationsController } from './organizations.controller';
 import { CreateOrganizationUsecase } from './usecases/create-organization.usecase';
 import { UserRoles } from '@modules/users/entities/user.entity';
 import { InviteUserUsecase } from './usecases/invite-user.usecase';
+import { ListOrganizationsUsecase } from './usecases/list-organizations.usecase';
+import { GetOrganizationByIdUsecase } from './usecases/get-organization-by-id.usecase';
 
 describe('OrganizationsController', () => {
   let controller: OrganizationsController;
@@ -15,6 +17,14 @@ describe('OrganizationsController', () => {
   };
 
   const inviteUserUsecaseMock = {
+    execute: jest.fn(),
+  };
+
+  const listOrganizationsUsecaseMock = {
+    execute: jest.fn(),
+  };
+
+  const getOrganizationByIdUsecaseMock = {
     execute: jest.fn(),
   };
 
@@ -30,11 +40,64 @@ describe('OrganizationsController', () => {
           provide: InviteUserUsecase,
           useValue: inviteUserUsecaseMock,
         },
+        {
+          provide: ListOrganizationsUsecase,
+          useValue: listOrganizationsUsecaseMock,
+        },
+        {
+          provide: GetOrganizationByIdUsecase,
+          useValue: getOrganizationByIdUsecaseMock,
+        },
       ],
     }).compile();
 
     controller = module.get<OrganizationsController>(OrganizationsController);
     jest.clearAllMocks();
+  });
+
+  it('deve listar organizações', async () => {
+    listOrganizationsUsecaseMock.execute.mockResolvedValue({
+      items: [],
+      page: 1,
+      pageSize: 20,
+      total: 0,
+    });
+
+    const result = await controller.list({ page: 1, pageSize: 20 });
+
+    expect(listOrganizationsUsecaseMock.execute).toHaveBeenCalledWith({
+      page: 1,
+      pageSize: 20,
+    });
+    expect(result.total).toBe(0);
+  });
+
+  it('deve obter organização por id', async () => {
+    getOrganizationByIdUsecaseMock.execute.mockResolvedValue({
+      _id: '507f1f77bcf86cd799439011',
+      name: 'Mercury',
+      ownerId: null,
+      planType: OrganizationPlanTypes.BUSINESS,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    const result = await controller.getById('507f1f77bcf86cd799439011');
+
+    expect(getOrganizationByIdUsecaseMock.execute).toHaveBeenCalledWith(
+      '507f1f77bcf86cd799439011',
+    );
+    expect(result.name).toBe('Mercury');
+  });
+
+  it('deve propagar NotFoundException ao obter organização inexistente', async () => {
+    getOrganizationByIdUsecaseMock.execute.mockRejectedValue(
+      new NotFoundException('Organização não encontrada.'),
+    );
+
+    await expect(
+      controller.getById('507f1f77bcf86cd799439011'),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('deve retornar resultado ao criar organização', async () => {
