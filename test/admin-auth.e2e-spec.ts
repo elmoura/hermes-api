@@ -65,4 +65,55 @@ describe('Admin API key (e2e)', () => {
       .send({})
       .expect(400);
   });
+
+  it('GET /admin/organizations/:id/users sem Authorization → 401', () => {
+    return request(app.getHttpServer())
+      .get('/admin/organizations/507f1f77bcf86cd799439011/users')
+      .expect(401);
+  });
+
+  it('GET /admin/organizations/:id/users com Bearer e org inexistente → 404', () => {
+    return request(app.getHttpServer())
+      .get('/admin/organizations/507f1f77bcf86cd799439011/users')
+      .set('Authorization', `Bearer ${adminKey}`)
+      .expect(404);
+  });
+
+  it('GET /admin/organizations/:id/users com Bearer e id inválido → 400', () => {
+    return request(app.getHttpServer())
+      .get('/admin/organizations/invalid-id/users')
+      .set('Authorization', `Bearer ${adminKey}`)
+      .expect(400);
+  });
+
+  const tenantOrgId = '507f1f77bcf86cd799439011';
+  const tenantUserId = '507f1f77bcf86cd799439012';
+
+  it('PATCH /organizations/:orgId/members/:userId sem Authorization → 401', () => {
+    return request(app.getHttpServer())
+      .patch(`/organizations/${tenantOrgId}/members/${tenantUserId}`)
+      .send({ role: 'admin' })
+      .expect(401);
+  });
+
+  it('PATCH /organizations/:orgId/members/:userId com API key staff (sem JWT tenant) → 401', () => {
+    return request(app.getHttpServer())
+      .patch(`/organizations/${tenantOrgId}/members/${tenantUserId}`)
+      .set('Authorization', `Bearer ${adminKey}`)
+      .send({ role: 'admin' })
+      .expect(401);
+  });
+
+  it('DELETE /organizations/:orgId/members/:userId sem Authorization → 401', () => {
+    return request(app.getHttpServer())
+      .delete(`/organizations/${tenantOrgId}/members/${tenantUserId}`)
+      .expect(401);
+  });
+
+  it('DELETE /organizations/:orgId/members/:userId com API key staff (sem JWT tenant) → 401', () => {
+    return request(app.getHttpServer())
+      .delete(`/organizations/${tenantOrgId}/members/${tenantUserId}`)
+      .set('Authorization', `Bearer ${adminKey}`)
+      .expect(401);
+  });
 });

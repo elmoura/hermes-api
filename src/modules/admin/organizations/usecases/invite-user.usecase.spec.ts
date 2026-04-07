@@ -130,6 +130,25 @@ describe('InviteUserUsecase', () => {
     ).rejects.toBeInstanceOf(InvalidDataException);
   });
 
+  it('deve usar member quando role omitida no comando', async () => {
+    const newUserId = new Types.ObjectId();
+    userDatasourceMock.create.mockResolvedValue({
+      _id: newUserId,
+      organizationId,
+    });
+
+    await usecase.execute({
+      organizationId: organizationId.toString(),
+      email: 'novo@empresa.com',
+    });
+
+    expect(userDatasourceMock.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        role: UserRoles.MEMBER,
+      }),
+    );
+  });
+
   it('deve usar a role informada ao convidar', async () => {
     const newUserId = new Types.ObjectId();
     userDatasourceMock.create.mockResolvedValue({

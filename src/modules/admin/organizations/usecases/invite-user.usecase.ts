@@ -11,7 +11,8 @@ import { InvalidDataException } from '../exceptions/invalid-data.exception';
 export type InviteUserCommand = {
   organizationId: string;
   email: string;
-  role: UserRoles;
+  /** Padrão: `member` quando omitido. */
+  role?: UserRoles;
 };
 
 @Injectable()
@@ -35,7 +36,8 @@ export class InviteUserUsecase {
       throw new InvalidDataException('Organização não encontrada.');
     }
 
-    const { email, role } = input;
+    const { email } = input;
+    const role = input.role ?? UserRoles.MEMBER;
     const existing = await this.userDatasource.findByEmail(email);
 
     if (

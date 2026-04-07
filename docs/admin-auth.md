@@ -23,6 +23,7 @@ Mensagens de erro são genéricas (`Unauthorized`), sem expor se a chave existe 
 
 - `GET /admin/organizations`
 - `GET /admin/organizations/:organizationId`
+- `GET /admin/organizations/:organizationId/users`
 - `POST /admin/organizations`
 - `POST /organizations/:organizationId/invite-user`
 

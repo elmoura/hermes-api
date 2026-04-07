@@ -27,10 +27,13 @@ import { CreateOrganizationOutputDto } from './usecases/dtos/create-organization
 import { InviteUserInputDto } from './usecases/dtos/invite-user-input.dto';
 import { ListOrganizationsQueryDto } from './usecases/dtos/list-organizations-query.dto';
 import { ListOrganizationsOutputDto } from './usecases/dtos/list-organizations-output.dto';
+import { ListOrganizationUsersOutputDto } from './usecases/dtos/list-organization-users-output.dto';
+import { ListOrganizationUsersQueryDto } from './usecases/dtos/list-organization-users-query.dto';
 import { OrganizationDetailOutputDto } from './usecases/dtos/organization-detail-output.dto';
 import { CreateOrganizationUsecase } from './usecases/create-organization.usecase';
 import { GetOrganizationByIdUsecase } from './usecases/get-organization-by-id.usecase';
 import { InviteUserUsecase } from './usecases/invite-user.usecase';
+import { ListOrganizationUsersUsecase } from './usecases/list-organization-users.usecase';
 import { ListOrganizationsUsecase } from './usecases/list-organizations.usecase';
 
 @ApiTags('Organizações (admin)')
@@ -43,6 +46,7 @@ export class OrganizationsController {
     private readonly inviteUserUsecase: InviteUserUsecase,
     private readonly listOrganizationsUsecase: ListOrganizationsUsecase,
     private readonly getOrganizationByIdUsecase: GetOrganizationByIdUsecase,
+    private readonly listOrganizationUsersUsecase: ListOrganizationUsersUsecase,
   ) {}
 
   @Get('admin/organizations')
@@ -64,6 +68,36 @@ export class OrganizationsController {
     @Query() query: ListOrganizationsQueryDto,
   ): Promise<ListOrganizationsOutputDto> {
     return await this.listOrganizationsUsecase.execute(query);
+  }
+
+  @Get('admin/organizations/:organizationId/users')
+  @ApiOperation({
+    summary: 'Listar usuários da organização (paginado)',
+    description:
+      'Membros e convites pendentes (`accountStatus` = `pending_confirmation`) da organização. Sem `password` nem `confirmation`. O convite continua em `POST /organizations/:organizationId/invite-user`.',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'ID da organização (MongoDB ObjectId)',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number, example: 20 })
+  @ApiOkResponse({
+    description: 'Lista paginada de membros',
+    type: ListOrganizationUsersOutputDto,
+  })
+  @ApiNotFoundResponse({ description: 'Organização não encontrada' })
+  @ApiUnauthorizedResponse({ description: 'Credencial ausente ou inválida' })
+  @ApiResponse({ status: 400, description: 'ID de organização inválido' })
+  async listOrganizationUsers(
+    @Param('organizationId') organizationId: string,
+    @Query() query: ListOrganizationUsersQueryDto,
+  ): Promise<ListOrganizationUsersOutputDto> {
+    return await this.listOrganizationUsersUsecase.execute(
+      organizationId,
+      query,
+    );
   }
 
   @Get('admin/organizations/:organizationId')
@@ -105,7 +139,11 @@ export class OrganizationsController {
 
   @Post('organizations/:organizationId/invite-user')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Convidar usuário por e-mail' })
+  @ApiOperation({
+    summary: 'Convidar usuário por e-mail',
+    description:
+      'Rota mantida fora de `/admin/...` por compatibilidade com integrações existentes; exige o mesmo auth admin (Bearer) das demais rotas protegidas.',
+  })
   @ApiParam({
     name: 'organizationId',
     description: 'ID da organização (MongoDB ObjectId)',

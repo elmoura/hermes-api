@@ -25,5 +25,10 @@ import { UsersController } from './users.controller';
     Md5HashService,
     ConfirmAccountUsecase,
   ],
+  exports: [
+    UserEntityDatasource,
+    OrganizationEntityDatasource,
+    Md5HashService,
+  ],
 })
 export class UsersModule {}

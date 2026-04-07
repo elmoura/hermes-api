@@ -46,7 +46,12 @@ export class UserEntity {
 
   @Prop({ required: true })
   phoneNumber: string;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type UserDocument = HydratedDocument<UserEntity>;
 export const UserSchema = SchemaFactory.createForClass(UserEntity);
+
+UserSchema.index({ organizationId: 1 });

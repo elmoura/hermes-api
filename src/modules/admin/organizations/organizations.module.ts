@@ -15,6 +15,7 @@ import { CreateOrganizationUsecase } from './usecases/create-organization.usecas
 import { GetOrganizationByIdUsecase } from './usecases/get-organization-by-id.usecase';
 import { InviteUserUsecase } from './usecases/invite-user.usecase';
 import { ListOrganizationsUsecase } from './usecases/list-organizations.usecase';
+import { ListOrganizationUsersUsecase } from './usecases/list-organization-users.usecase';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ListOrganizationsUsecase } from './usecases/list-organizations.usecase'
     InviteUserUsecase,
     ListOrganizationsUsecase,
     GetOrganizationByIdUsecase,
+    ListOrganizationUsersUsecase,
     Md5HashService,
     EmailService,
   ],

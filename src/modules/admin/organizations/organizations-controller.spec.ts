@@ -8,6 +8,8 @@ import { UserRoles } from '@modules/users/entities/user.entity';
 import { InviteUserUsecase } from './usecases/invite-user.usecase';
 import { ListOrganizationsUsecase } from './usecases/list-organizations.usecase';
 import { GetOrganizationByIdUsecase } from './usecases/get-organization-by-id.usecase';
+import { ListOrganizationUsersUsecase } from './usecases/list-organization-users.usecase';
+import { AccountStatus } from '@modules/users/entities/user.entity';
 
 describe('OrganizationsController', () => {
   let controller: OrganizationsController;
@@ -25,6 +27,10 @@ describe('OrganizationsController', () => {
   };
 
   const getOrganizationByIdUsecaseMock = {
+    execute: jest.fn(),
+  };
+
+  const listOrganizationUsersUsecaseMock = {
     execute: jest.fn(),
   };
 
@@ -47,6 +53,10 @@ describe('OrganizationsController', () => {
         {
           provide: GetOrganizationByIdUsecase,
           useValue: getOrganizationByIdUsecaseMock,
+        },
+        {
+          provide: ListOrganizationUsersUsecase,
+          useValue: listOrganizationUsersUsecaseMock,
         },
       ],
     }).compile();
@@ -97,6 +107,48 @@ describe('OrganizationsController', () => {
 
     await expect(
       controller.getById('507f1f77bcf86cd799439011'),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('deve listar usuários da organização', async () => {
+    listOrganizationUsersUsecaseMock.execute.mockResolvedValue({
+      items: [
+        {
+          _id: '507f1f77bcf86cd799439012',
+          email: 'a@b.com',
+          role: UserRoles.MEMBER,
+          accountStatus: AccountStatus.ACTIVE,
+          firstName: 'Ana',
+          lastName: 'Silva',
+          phoneNumber: '+5511999999999',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+      page: 1,
+      pageSize: 20,
+      total: 1,
+    });
+
+    const result = await controller.listOrganizationUsers(
+      '507f1f77bcf86cd799439011',
+      { page: 1, pageSize: 20 },
+    );
+
+    expect(listOrganizationUsersUsecaseMock.execute).toHaveBeenCalledWith(
+      '507f1f77bcf86cd799439011',
+      { page: 1, pageSize: 20 },
+    );
+    expect(result.total).toBe(1);
+  });
+
+  it('deve propagar NotFoundException ao listar usuários de organização inexistente', async () => {
+    listOrganizationUsersUsecaseMock.execute.mockRejectedValue(
+      new NotFoundException('Organização não encontrada.'),
+    );
+
+    await expect(
+      controller.listOrganizationUsers('507f1f77bcf86cd799439011', {}),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 

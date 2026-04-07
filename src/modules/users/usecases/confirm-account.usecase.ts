@@ -47,14 +47,10 @@ export class ConfirmAccountUsecase {
     };
     const createdAt =
       withTimestamps.createdAt ??
-      (typeof doc.get === 'function'
-        ? (doc.get('createdAt') as Date | undefined)
-        : undefined);
+      (typeof doc.get === 'function' ? doc.get('createdAt') : undefined);
     const updatedAt =
       withTimestamps.updatedAt ??
-      (typeof doc.get === 'function'
-        ? (doc.get('updatedAt') as Date | undefined)
-        : undefined);
+      (typeof doc.get === 'function' ? doc.get('updatedAt') : undefined);
 
     return {
       _id: doc._id.toString(),

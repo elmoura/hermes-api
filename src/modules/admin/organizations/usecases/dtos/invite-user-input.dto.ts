@@ -10,7 +10,8 @@ export class InviteUserInputDto {
 
   @ApiPropertyOptional({
     enum: UserRoles,
-    description: 'Padrão do convite se omitido.',
+    default: UserRoles.MEMBER,
+    description: 'Papel após aceitar o convite. Se omitido, usa `member`.',
   })
   @IsOptional()
   @IsIn(Object.values(UserRoles))

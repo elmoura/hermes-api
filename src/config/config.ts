@@ -5,6 +5,11 @@ export function getAdminApiKey(): string {
   return process.env.ADMIN_API_KEY ?? '';
 }
 
+/** Segredo HS256 para JWT de utilizadores do tenant (adonis-web). */
+export function getJwtSecret(): string {
+  return process.env.JWT_SECRET ?? '';
+}
+
 export const config = {
   mongoUri: process.env.MONGO_URI ?? '',
   mail: {
@@ -14,6 +19,8 @@ export const config = {
     frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:3000',
   },
   security: {
+    jwtSecret: process.env.JWT_SECRET ?? '',
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
     confirmAccountHashSecret: process.env.CONFIRM_ACCOUNT_HASH_SECRET ?? '',
     passwordMd5Salt: process.env.PASSWORD_MD5_SALT ?? '',
     inviteTokenTtlMs: (() => {
