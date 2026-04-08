@@ -12,6 +12,19 @@ export function getJwtSecret(): string {
 
 export const config = {
   mongoUri: process.env.MONGO_URI ?? '',
+  /**
+   * CORS: em desenvolvimento aceita-se qualquer origem em `localhost` / `127.0.0.1` (ex.: Vite).
+   * Em produção só entram `mail.frontendUrl`, `cors.extraOrigins` e, se definido, `CORS_ALLOW_LOCALHOST=true`.
+   */
+  cors: {
+    extraOrigins: (process.env.CORS_ORIGIN ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
+    allowLocalhost:
+      process.env.NODE_ENV !== 'production' ||
+      process.env.CORS_ALLOW_LOCALHOST === 'true',
+  },
   mail: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -31,5 +44,9 @@ export const config = {
   whatsapp: {
     verificationToken: process.env.WHATSAPP_VERIFICATION_TOKEN ?? '',
     businessToken: process.env.WHATSAPP_BUSINESS_TOKEN ?? '',
+  },
+  meta: {
+    appId: process.env.META_APP_ID ?? '',
+    appSecret: process.env.META_APP_SECRET ?? '',
   },
 };

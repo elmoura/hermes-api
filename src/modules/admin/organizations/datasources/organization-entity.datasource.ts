@@ -82,4 +82,15 @@ export class OrganizationEntityDatasource {
       { returnDocument: 'after', session },
     );
   }
+
+  async updateById(
+    organizationId: Types.ObjectId,
+    data: Partial<OrganizationEntity>,
+    session?: ClientSession,
+  ): Promise<OrganizationDocument | null> {
+    return this.organizationModel.findByIdAndUpdate(organizationId, data, {
+      returnDocument: 'after',
+      session,
+    });
+  }
 }

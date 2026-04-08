@@ -21,9 +21,20 @@ export class OrganizationEntity {
   })
   planType: OrganizationPlanTypes;
 
+  @Prop()
   facebookBusinessId?: string;
 
+  @Prop()
   whatsappBusinessToken: string;
+
+  @Prop()
+  tokenExpiresAt?: Date;
+
+  @Prop()
+  tokenLastRefreshedAt?: Date;
+
+  @Prop({ type: [String], default: [] })
+  whatsappNumbers?: string[];
 }
 
 export type OrganizationDocument = HydratedDocument<OrganizationEntity>;

@@ -4,19 +4,39 @@ import { config } from '@/config/config';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+function isLocalhostOrigin(origin: string): boolean {
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === 'localhost' || hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const corsOrigins = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
-    : [
-        config.mail.frontendUrl,
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-      ];
+  const allowedOrigins = new Set([
+    config.mail.frontendUrl,
+    ...config.cors.extraOrigins,
+  ]);
 
   app.enableCors({
-    origin: corsOrigins,
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+      if (config.cors.allowLocalhost && isLocalhostOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(null, false);
+    },
     credentials: true,
   });
 
